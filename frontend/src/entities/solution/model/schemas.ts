@@ -12,7 +12,13 @@ export const solutionStudentSchema = z
   .object({
     status: z.literal(VALID_STATUSES, 'Обязательное поле'),
     answer: z.string(),
-    file_answer: z.array(z.file()),
+    file_answer: z
+      .array(z.file())
+      .refine(
+        (files) =>
+          files.reduce((sum, f) => sum + f.size, 0) <= 30 * 1024 * 1024,
+        'Суммарный размер файлов не должен превышать 30 МБ',
+      ),
     deleted_file_ids: z.array(z.number()),
   })
   .superRefine((data, ctx) => {
